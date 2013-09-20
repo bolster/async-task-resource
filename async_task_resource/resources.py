@@ -58,7 +58,8 @@ class AsyncTaskResource(Resource):
         self.throttle_check(request)
         self.log_throttled_access(request)
 
-        result_id = task.delay(request, **kwargs).id
+        result_id = kwargs.get(
+            'task_uuid', task.delay(request, **kwargs).id)
         result = CeleryTaskObject(result_id)
 
         # If the task has completed, everything should be in a state where the
