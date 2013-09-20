@@ -61,9 +61,13 @@ class AsyncTaskResource(Resource):
         result_id = task.delay(request, **kwargs).id
         result = CeleryTaskObject(result_id)
 
+        # If the task has completed, everything should be in a state where the
+        # regular Tastypie methods should return the right result.
         if result.ready:
             return super(AsyncTaskResource, self).dispatch(
                 request_type, request, **kwargs)
+
+        # If the task is still executing, return a simple status response.
         response = self.create_response(request, {
             'uuid': result.uuid,
             'status': result.status,
